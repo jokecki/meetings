@@ -1,0 +1,13 @@
+process.env.DATABASE_URL = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/postgres";
+process.env.NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET ?? "test-secret";
+process.env.AUTH_SECRET = process.env.AUTH_SECRET ?? "test-auth";
+process.env.NEXTAUTH_URL = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY ?? Buffer.from("a".repeat(32)).toString("base64");
+process.env.SUPABASE_URL = process.env.SUPABASE_URL ?? "http://localhost";
+process.env.SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? "anon";
+process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "service";
+process.env.STORAGE_PROVIDER = process.env.STORAGE_PROVIDER ?? "VERCEL_BLOB";
+process.env.BLOB_READ_WRITE_TOKEN = process.env.BLOB_READ_WRITE_TOKEN ?? "token";
+process.env.DEEPGRAM_API_BASE = process.env.DEEPGRAM_API_BASE ?? "https://api.deepgram.com";
+process.env.ELEVENLABS_API_BASE = process.env.ELEVENLABS_API_BASE ?? "https://api.elevenlabs.io";
+process.env.OPENAI_API_BASE = process.env.OPENAI_API_BASE ?? "https://api.openai.com/v1";

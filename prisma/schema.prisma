@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TranscriptionProvider {
+  DEEPGRAM
+  ELEVENLABS
+  OPENAI
+}
+
+enum TranscriptionStatus {
+  PENDING
+  UPLOADING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum StorageProvider {
+  VERCEL_BLOB
+  R2
+  UNKNOWN
+}
+
+model User {
+  id              String           @id @default(cuid())
+  email           String           @unique
+  passwordHash    String
+  name            String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  transcriptions  Transcription[]
+  apiKeys         ApiKey[]
+  promptTemplates PromptTemplate[]
+  audioAssets     AudioAsset[]
+}
+
+model ApiKey {
+  id        String                @id @default(cuid())
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  provider  TranscriptionProvider
+  nickname  String?
+  encrypted String
+  nonce     String
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  @@unique([userId, provider])
+}
+
+model PromptTemplate {
+  id        String                @id @default(cuid())
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  provider  TranscriptionProvider
+  model     String?
+  label     String
+  content   String
+  isDefault Boolean               @default(false)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  @@unique([userId, provider, model, label])
+  @@index([userId, provider, isDefault])
+}
+
+model AudioAsset {
+  id              String          @id @default(cuid())
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  transcription   Transcription?  @relation("TranscriptionAudioAsset")
+  storageProvider StorageProvider @default(UNKNOWN)
+  fileUrl         String
+  fileName        String
+  mimeType        String
+  sizeBytes       Int
+  durationSeconds Int?
+  checksum        String?
+  expiresAt       DateTime?
+  createdAt       DateTime        @default(now())
+
+  @@index([expiresAt])
+}
+
+model Transcription {
+  id              String                @id @default(cuid())
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  audioAsset      AudioAsset?           @relation("TranscriptionAudioAsset", fields: [audioAssetId], references: [id], onDelete: SetNull)
+  audioAssetId    String?               @unique
+  title           String?
+  status          TranscriptionStatus   @default(PENDING)
+  provider        TranscriptionProvider
+  model           String?
+  externalJobId   String?
+  language        String?
+  durationSeconds Int?
+  promptUsed      String?
+  customPrompt    String?
+  confidence      Float?
+  metadata        Json?
+  errorCode       String?
+  errorMessage    String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  completedAt     DateTime?
+
+  segments Segment[]
+  speakers Speaker[]
+
+  @@index([userId, createdAt])
+}
+
+model Speaker {
+  id              String        @id @default(cuid())
+  transcription   Transcription @relation(fields: [transcriptionId], references: [id], onDelete: Cascade)
+  transcriptionId String
+  speakerKey      String
+  displayName     String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  segments        Segment[]
+
+  @@unique([transcriptionId, speakerKey])
+}
+
+model Segment {
+  id              String        @id @default(cuid())
+  transcription   Transcription @relation(fields: [transcriptionId], references: [id], onDelete: Cascade)
+  transcriptionId String
+  speaker         Speaker?      @relation(fields: [speakerId], references: [id], onDelete: SetNull)
+  speakerId       String?
+  speakerKey      String?
+  startMs         Int
+  endMs           Int
+  text            String
+  confidence      Float?
+  words           Json?
+  createdAt       DateTime      @default(now())
+
+  @@index([transcriptionId, startMs])
+}
