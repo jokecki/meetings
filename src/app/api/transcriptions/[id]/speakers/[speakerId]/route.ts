@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { authOptions } from "@/lib/auth/options";
@@ -9,8 +9,8 @@ const schema = z.object({
 });
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string; speakerId: string } },
+  request: NextRequest,
+  context: { params: Promise<{ id: string; speakerId: string }> },
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
@@ -23,8 +23,10 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const { id, speakerId } = await context.params;
+
   try {
-    const speaker = await renameSpeaker(params.id, params.speakerId, parsed.data.displayName);
+    const speaker = await renameSpeaker(id, speakerId, parsed.data.displayName);
     return NextResponse.json({ data: speaker });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur";

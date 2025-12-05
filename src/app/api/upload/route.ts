@@ -4,7 +4,7 @@ import { put } from "@vercel/blob";
 import { authOptions } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma";
 import { serverEnv } from "@/env/server";
-import { StorageProvider } from "@prisma/client";
+import { StorageProvider } from "@/generated/prisma";
 
 export const runtime = "nodejs";
 
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   const objectKey = `audio/${session.user.id}/${Date.now()}-${file.name}`;
 
   const blob = await put(objectKey, file, {
-    access: "private",
+    access: "public",
     token: serverEnv.BLOB_READ_WRITE_TOKEN,
     contentType: file.type,
   });

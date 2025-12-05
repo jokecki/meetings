@@ -1,4 +1,4 @@
-import { TranscriptionProvider } from "@prisma/client";
+import { TranscriptionProvider } from "@/generated/prisma";
 import { serverEnv } from "@/env/server";
 import { TranscriptionProviderAdapter } from "./types";
 import { deepgramProvider } from "./providers/deepgram";

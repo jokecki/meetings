@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { authOptions } from "@/lib/auth/options";
@@ -66,15 +66,16 @@ async function buildDocxBuffer(transcription: Awaited<ReturnType<typeof getTrans
 }
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
-  const transcription = await getTranscriptionWithSegments(params.id, session.user.id);
+  const { id } = await context.params;
+  const transcription = await getTranscriptionWithSegments(id, session.user.id);
   if (!transcription) {
     return NextResponse.json({ error: "Transcription introuvable" }, { status: 404 });
   }
@@ -84,7 +85,7 @@ export async function GET(
 
   if (format === "docx") {
     const buffer = await buildDocxBuffer(transcription);
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as unknown as BodyInit, {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "Content-Disposition": `attachment; filename=transcription-${transcription.id}.docx`,

@@ -1,7 +1,8 @@
 import {
+  Prisma,
   TranscriptionProvider,
   TranscriptionStatus,
-} from "@prisma/client";
+} from "@/generated/prisma";
 import { prisma } from "@/lib/prisma";
 import { getProviderAdapter } from "@/server/providers";
 import type { ProviderTranscriptionPayload } from "@/server/providers/types";
@@ -40,7 +41,7 @@ export async function createTranscriptionJob(input: CreateTranscriptionInput) {
       metadata: {
         additionalConfig: input.additionalConfig ?? {},
         diarize: input.diarize ?? true,
-      },
+      } as Prisma.JsonObject,
     },
   });
 
@@ -118,7 +119,11 @@ export async function processTranscription(transcriptionId: string) {
             endMs: segment.endMs,
             text: segment.text,
             confidence: segment.confidence,
-            words: segment.words ?? null,
+            ...(segment.words
+              ? { words: ((segment.words ?? Prisma.JsonNull) as
+                | Prisma.InputJsonValue
+                | Prisma.NullableJsonNullValueInput) }
+              : {}),
           })),
         });
       }
@@ -129,12 +134,13 @@ export async function processTranscription(transcriptionId: string) {
           status: TranscriptionStatus.COMPLETED,
           externalJobId: result.externalJobId,
           language: result.language,
-          durationSeconds: result.durationSeconds ?? transcription.audioAsset.durationSeconds,
+          durationSeconds:
+            result.durationSeconds ?? transcription.audioAsset?.durationSeconds ?? null,
           confidence: result.confidence,
           metadata: {
             ...metadata,
             providerResponse: result.metadata ?? {},
-          },
+          } as Prisma.JsonObject,
           completedAt: new Date(),
         },
       });

@@ -38,7 +38,6 @@ export function AudioPlayer({ audioUrl, onTimeUpdate, onReady }: AudioPlayerProp
       barRadius: 2,
       barWidth: 2,
       height: 80,
-      responsive: true,
     });
 
     waveSurferRef.current = instance;
@@ -70,13 +69,17 @@ export function AudioPlayer({ audioUrl, onTimeUpdate, onReady }: AudioPlayerProp
 
     instance.on("ready", readyHandler);
     instance.on("audioprocess", timeHandler);
-    instance.on("seek", timeHandler);
+    instance.on("interaction", timeHandler);
     instance.on("finish", finishHandler);
+
+    instance.on("error", (error: unknown) => {
+      console.error("WaveSurfer error", error);
+    });
 
     return () => {
       instance.un("ready", readyHandler);
       instance.un("audioprocess", timeHandler);
-      instance.un("seek", timeHandler);
+      instance.un("interaction", timeHandler);
       instance.un("finish", finishHandler);
       instance.destroy();
       waveSurferRef.current = null;

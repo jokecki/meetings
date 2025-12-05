@@ -64,7 +64,7 @@ export function TranscriptionDetailShell({ transcription: initialTranscription }
   const queryClient = useQueryClient();
   const [currentTimeMs, setCurrentTimeMs] = useState(0);
   const [activeSpeakerId, setActiveSpeakerId] = useState<string | null>(null);
-  const audioSeekRef = useRef<(ms: number) => void>();
+  const audioSeekRef = useRef<((ms: number) => void) | null>(null);
   const [formState, setFormState] = useState({
     title: initialTranscription.title ?? "",
     customPrompt: initialTranscription.customPrompt ?? "",
@@ -74,7 +74,8 @@ export function TranscriptionDetailShell({ transcription: initialTranscription }
     queryKey: ["transcription", initialTranscription.id],
     queryFn: () => fetchTranscriptionDetailRequest(initialTranscription.id),
     initialData: initialTranscription,
-    refetchInterval: (data) => (data && shouldRefetch(data.status) ? REFRESH_INTERVAL : false),
+    refetchInterval: (query) =>
+      query.state.data && shouldRefetch(query.state.data.status) ? REFRESH_INTERVAL : false,
   });
 
   const transcription = detailQuery.data;
@@ -189,13 +190,13 @@ export function TranscriptionDetailShell({ transcription: initialTranscription }
                 type="submit"
                 className={clsx(
                   "inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition",
-                  updateMetadataMutation.isLoading
+                  updateMetadataMutation.isPending
                     ? "bg-slate-700 text-slate-300"
                     : "bg-indigo-500 text-white hover:bg-indigo-400",
                 )}
-                disabled={updateMetadataMutation.isLoading}
+                disabled={updateMetadataMutation.isPending}
               >
-                {updateMetadataMutation.isLoading ? "Enregistrement..." : "Enregistrer"}
+                {updateMetadataMutation.isPending ? "Enregistrement..." : "Enregistrer"}
               </button>
               {updateMetadataMutation.isError && (
                 <p className="text-xs text-rose-400">Erreur pendant la mise à jour.</p>

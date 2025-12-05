@@ -7,7 +7,7 @@ import {
   listUserTranscriptions,
   processTranscription,
 } from "@/server/services/transcriptionService";
-import { TranscriptionProvider } from "@prisma/client";
+import { TranscriptionProvider } from "@/generated/prisma";
 
 const createSchema = z.object({
   audioAssetId: z.string().min(1),
@@ -17,7 +17,7 @@ const createSchema = z.object({
   customPrompt: z.string().optional(),
   language: z.string().optional(),
   diarize: z.boolean().optional(),
-  additionalConfig: z.record(z.any()).optional(),
+  additionalConfig: z.record(z.string(), z.unknown()).optional(),
 });
 
 export async function GET() {

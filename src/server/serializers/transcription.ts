@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@/generated/prisma";
 import type {
   AudioAsset as ApiAudioAsset,
   Segment as ApiSegment,
@@ -120,7 +120,7 @@ export function serializeTranscriptionDetail(
     promptUsed: transcription.promptUsed,
     customPrompt: transcription.customPrompt,
     confidence: transcription.confidence,
-    metadata: transcription.metadata,
+    metadata: (transcription.metadata ?? null) as Record<string, unknown> | null,
     errorCode: transcription.errorCode,
     errorMessage: transcription.errorMessage,
     createdAt: formatDate(transcription.createdAt) ?? DEFAULT_LOCALE_STRING,

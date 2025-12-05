@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
-import { TranscriptionProvider } from "@prisma/client";
+import { TranscriptionProvider } from "@/generated/prisma";
 import { getProviderAdapter } from "@/server/providers";
 
 export async function GET() {

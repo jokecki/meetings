@@ -1,4 +1,4 @@
-import { TranscriptionProvider } from "@prisma/client";
+import { TranscriptionProvider } from "@/generated/prisma";
 
 export type SegmentResult = {
   speakerKey: string;

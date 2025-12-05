@@ -4,7 +4,7 @@ import { z } from "zod";
 import { authOptions } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma";
 import { encryptSecret } from "@/server/utils/encryption";
-import { TranscriptionProvider } from "@prisma/client";
+import { TranscriptionProvider } from "@/generated/prisma";
 
 const saveSchema = z.object({
   provider: z.nativeEnum(TranscriptionProvider),

@@ -157,10 +157,10 @@ export function ApiKeyManager({ items, isLoading }: Props) {
 
           <button
             type="submit"
-            disabled={saveMutation.isLoading}
+            disabled={saveMutation.isPending}
             className="inline-flex items-center rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:bg-indigo-900"
           >
-            {saveMutation.isLoading ? "Enregistrement..." : "Enregistrer"}
+            {saveMutation.isPending ? "Enregistrement..." : "Enregistrer"}
           </button>
         </form>
 
@@ -191,7 +191,7 @@ export function ApiKeyManager({ items, isLoading }: Props) {
                         <button
                           onClick={() => handleDelete(provider)}
                           className="rounded-md border border-rose-500/60 px-2 py-1 text-xs font-medium text-rose-200 transition hover:bg-rose-500/20"
-                          disabled={deleteMutation.isLoading}
+                          disabled={deleteMutation.isPending}
                           type="button"
                         >
                           Supprimer

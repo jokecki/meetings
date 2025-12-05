@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { authOptions } from "@/lib/auth/options";
@@ -18,15 +18,16 @@ const updateSchema = z
   });
 
 export async function GET(
-  _request: Request,
-  { params }: { params: { id: string } },
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> },
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
-  const transcription = await getTranscriptionWithSegments(params.id, session.user.id);
+  const { id } = await context.params;
+  const transcription = await getTranscriptionWithSegments(id, session.user.id);
 
   if (!transcription) {
     return NextResponse.json({ error: "Transcription introuvable" }, { status: 404 });
@@ -36,8 +37,8 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
@@ -50,9 +51,11 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const { id } = await context.params;
+
   try {
-    await updateTranscriptionMetadata(params.id, session.user.id, parsed.data);
-    const transcription = await getTranscriptionWithSegments(params.id, session.user.id);
+    await updateTranscriptionMetadata(id, session.user.id, parsed.data);
+    const transcription = await getTranscriptionWithSegments(id, session.user.id);
     if (!transcription) {
       return NextResponse.json({ error: "Transcription introuvable" }, { status: 404 });
     }
